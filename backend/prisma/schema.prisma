@@ -1,0 +1,96 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
+  password      String
+  name                 String?
+  avatar               String?
+  isVerified           Boolean   @default(false)
+  verificationToken    String?
+  refreshToken         String?
+  resetPasswordToken   String?
+  resetPasswordExpires DateTime?
+  learning_goal        Int       @default(0)
+  lessons       Lesson[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+enum LessonStatus {
+  DRAFT
+  IN_PROGRESS
+  COMPLETED
+}
+
+model Lesson {
+  id                   Int          @id @default(autoincrement())
+  title                String
+  description          String?
+  notes                String?      @db.Text
+  status               LessonStatus @default(DRAFT)
+  goalWordsCount       Int?
+  lastReviewedAt       DateTime?
+  nextReviewAt         DateTime?
+  practiceModeDefault  Boolean      @default(false)
+  progressCache        Int?
+  userId               Int
+  user                 User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  words                Word[]
+  prepTasks            PrepTask[]
+  quizzes              LessonQuiz[]
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
+}
+
+model Word {
+  id            Int      @id @default(autoincrement())
+  term          String
+  definition    String
+  phonetic      String?
+  example       String?  @db.Text
+  isPinned      Boolean  @default(false)
+  tags          String[]
+  pronunciation String?
+  audioUrl      String?
+  personalNote  String?  @db.Text
+  isLearned     Boolean  @default(false)
+  lastReviewedAt DateTime?
+  reviewDueAt   DateTime?
+  lessonId      Int
+  lesson        Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model LessonQuiz {
+  id          Int      @id @default(autoincrement())
+  lessonId    Int
+  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  questions   Json
+  score       Int?
+  completedAt DateTime?
+  nextReviewAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model PrepTask {
+  id          Int      @id @default(autoincrement())
+  content     String
+  isCompleted Boolean  @default(false)
+  lessonId    Int
+  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
