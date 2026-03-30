@@ -11,20 +11,21 @@ datasource db {
 }
 
 model User {
-  id            Int      @id @default(autoincrement())
-  email         String   @unique
-  password      String
+  id                   Int               @id @default(autoincrement())
+  email                String            @unique
+  password             String
   name                 String?
   avatar               String?
-  isVerified           Boolean   @default(false)
+  isVerified           Boolean           @default(false)
   verificationToken    String?
   refreshToken         String?
   resetPasswordToken   String?
   resetPasswordExpires DateTime?
-  learning_goal        Int       @default(0)
-  lessons       Lesson[]
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  learning_goal        Int               @default(0)
+  lessons              Lesson[]
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+  PracticeSession      PracticeSession[]
 }
 
 enum LessonStatus {
@@ -34,55 +35,57 @@ enum LessonStatus {
 }
 
 model Lesson {
-  id                   Int          @id @default(autoincrement())
-  title                String
-  description          String?
-  notes                String?      @db.Text
-  status               LessonStatus @default(DRAFT)
-  goalWordsCount       Int?
-  lastReviewedAt       DateTime?
-  nextReviewAt         DateTime?
-  practiceModeDefault  Boolean      @default(false)
-  progressCache        Int?
-  userId               Int
-  user                 User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  words                Word[]
-  prepTasks            PrepTask[]
-  quizzes              LessonQuiz[]
-  createdAt            DateTime     @default(now())
-  updatedAt            DateTime     @updatedAt
+  id                  Int               @id @default(autoincrement())
+  title               String
+  description         String?
+  notes               String?           @db.Text
+  status              LessonStatus      @default(DRAFT)
+  goalWordsCount      Int?
+  lastReviewedAt      DateTime?
+  nextReviewAt        DateTime?
+  practiceModeDefault Boolean           @default(false)
+  progressCache       Int?
+  userId              Int
+  user                User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  words               Word[]
+  prepTasks           PrepTask[]
+  quizzes             LessonQuiz[]
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  PracticeSession     PracticeSession[]
 }
 
 model Word {
-  id            Int      @id @default(autoincrement())
-  term          String
-  definition    String
-  phonetic      String?
-  example       String?  @db.Text
-  isPinned      Boolean  @default(false)
-  tags          String[]
-  pronunciation String?
-  audioUrl      String?
-  personalNote  String?  @db.Text
-  isLearned     Boolean  @default(false)
+  id             Int              @id @default(autoincrement())
+  term           String
+  definition     String
+  phonetic       String?
+  example        String?          @db.Text
+  isPinned       Boolean          @default(false)
+  tags           String[]
+  pronunciation  String?
+  audioUrl       String?
+  personalNote   String?          @db.Text
+  isLearned      Boolean          @default(false)
   lastReviewedAt DateTime?
-  reviewDueAt   DateTime?
-  lessonId      Int
-  lesson        Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  reviewDueAt    DateTime?
+  lessonId       Int
+  lesson         Lesson           @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  PracticeRecord PracticeRecord[]
 }
 
 model LessonQuiz {
-  id          Int      @id @default(autoincrement())
-  lessonId    Int
-  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-  questions   Json
-  score       Int?
-  completedAt DateTime?
+  id           Int       @id @default(autoincrement())
+  lessonId     Int
+  lesson       Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  questions    Json
+  score        Int?
+  completedAt  DateTime?
   nextReviewAt DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }
 
 model PrepTask {
@@ -93,4 +96,29 @@ model PrepTask {
   lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model PracticeSession {
+  id             Int              @id @default(autoincrement())
+  userId         Int
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lessonId       Int?
+  lesson         Lesson?          @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  score          Int              @default(0)
+  completionTime Int // in seconds
+  correctCount   Int              @default(0)
+  incorrectCount Int              @default(0)
+  records        PracticeRecord[]
+  createdAt      DateTime         @default(now())
+}
+
+model PracticeRecord {
+  id                Int             @id @default(autoincrement())
+  practiceSessionId Int
+  practiceSession   PracticeSession @relation(fields: [practiceSessionId], references: [id], onDelete: Cascade)
+  wordId            Int
+  word              Word            @relation(fields: [wordId], references: [id], onDelete: Cascade)
+  isCorrect         Boolean
+  userAnswer        String?
+  createdAt         DateTime        @default(now())
 }

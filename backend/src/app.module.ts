@@ -9,6 +9,7 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { LessonsModule } from './lessons/lessons.module';
 import { AiModule } from './ai/ai.module';
+import { PracticeModule } from './practice/practice.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { AiModule } from './ai/ai.module';
     AuthModule,
     LessonsModule,
     AiModule,
+    PracticeModule,
   ],
   controllers: [AppController],
   providers: [

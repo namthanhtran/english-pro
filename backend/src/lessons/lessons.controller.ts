@@ -13,6 +13,7 @@ import {
 import { LessonsService } from './lessons.service';
 import { CreateLessonDto, UpdateLessonDto } from './dto/lesson.dto';
 import { CreateWordDto, UpdateWordDto } from './dto/word.dto';
+import { SubmitPracticeDto } from './dto/practice.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('lessons')
@@ -85,5 +86,23 @@ export class LessonsController {
   @Post(':id/generate-vocabulary')
   generateVocabulary(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
     return this.lessonsService.generateVocabulary(id, req.user.userId);
+  }
+
+  @Get(':id/practice')
+  getPractice(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
+    return this.lessonsService.getPractice(id, req.user.userId);
+  }
+
+  @Post(':id/practice/submit')
+  submitPractice(
+    @Req() req: any,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() submitPracticeDto: SubmitPracticeDto,
+  ) {
+    return this.lessonsService.submitPractice(
+      id,
+      req.user.userId,
+      submitPracticeDto,
+    );
   }
 }
